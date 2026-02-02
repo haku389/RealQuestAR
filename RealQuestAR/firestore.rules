@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // デフォルトは全拒否（安全）
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // MVP: ユーザー自身の報酬だけ読める
+    match /userRewards/{uid}/rewards/{rewardId} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      // 発行/更新/削除は Functions のみ（クライアント禁止）
+      allow create, update, delete: if false;
+    }
+  }
+}
